@@ -23,10 +23,11 @@ export const chainById = Object.fromEntries(chains.map(c => [c.id, c]));
 export const assetById = Object.fromEntries(assets.map(a => [a.id, a]));
 
 export const coverage = [
-  { protocol: 'Aave', scope: 'Core · EVM', state: 'Fixture-ready; live query unavailable', source: 'Official API/direct RPC intended' },
-  { protocol: 'Morpho Blue', scope: 'Core · EVM', state: 'Fixture-ready; live query unavailable', source: 'Official GraphQL intended' },
-  { protocol: 'Compound III', scope: 'Core · EVM', state: 'Fixture-ready; live RPC unavailable', source: 'Direct Comet reads intended' },
-  { protocol: 'Moonwell', scope: 'Core · Base', state: 'Fixture-ready; live endpoint opt-in', source: 'Official API intended' },
+  { protocol: 'Aave', scope: 'Core · Base', state: 'Live official GraphQL adapter; Base market and canonical address required', source: 'Official GraphQL' },
+  { protocol: 'Morpho Blue', scope: 'Core · Base', state: 'Live GraphQL adapter; response validated per request', source: 'Official GraphQL' },
+  { protocol: 'Compound III', scope: 'Core · Base', state: 'Unavailable until Comet RPC read is verified', source: 'Direct Comet reads required' },
+  { protocol: 'Moonwell', scope: 'Core · Base', state: 'Live native API adapter; canonical address required', source: 'Official markets API' },
+  { protocol: 'Seamless', scope: 'Core · Base', state: 'Unavailable pending native source and status validation', source: 'Advisory fallback cannot imply authority' },
   { protocol: 'Kamino', scope: 'Core · Solana', state: 'Fixture-ready; API shape unverified', source: 'Official API/RPC intended' },
   { protocol: 'Save / Solend', scope: 'Core · Solana', state: 'Fixture-ready; API shape unverified', source: 'Official API/RPC intended' },
   { protocol: 'Pendle / vaults / pools', scope: 'Degen', state: 'Deferred pending risk + exact-link review', source: 'No public rows' },

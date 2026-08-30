@@ -1,0 +1,8 @@
+name = "able-stable-api"
+main = "worker/index.ts"
+compatibility_date = "2026-08-30"
+workers_dev = true
+
+[vars]
+DEMO_MODE = "false"
+ALLOWED_ORIGIN = "https://dingusjones.github.io"

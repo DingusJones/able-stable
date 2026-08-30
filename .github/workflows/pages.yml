@@ -28,6 +28,8 @@ jobs:
         run: npm install --legacy-peer-deps --package-lock=false
       - name: Build site
         run: npm run build
+        env:
+          VITE_API_URL: https://able-stable-api.rondondom777.workers.dev
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact
