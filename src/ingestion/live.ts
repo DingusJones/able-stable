@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import { freshness } from '../domain/freshness';
 import { resolveLink } from '../domain/linkResolver';
+import { evmAssetId } from '../domain/identity';
 import type { AdapterRunResult, Opportunity, ProviderError, RewardComponent } from '../domain/types';
 
 export const BASE_CHAIN='eip155:8453';
 export const BASE_USDC='0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
-export const BASE_USDC_ID=`eip155:8453/erc20:${BASE_USDC}`;
+export const BASE_USDC_ID=evmAssetId(8453, BASE_USDC);
 export const decimal=z.union([z.string(),z.number()]).transform(v=>String(v)).refine(v=>/^(0|[1-9]\d*)(\.\d+)?$/.test(v)&&Number.isFinite(Number(v)), 'finite non-negative decimal required');
 export type Fetcher=(input:RequestInfo|URL,init?:RequestInit)=>Promise<Response>;
 export type LiveContext={fetcher:Fetcher;at:string;timeoutMs?:number;rpcUrl?:string;aaveDataProvider?:string;compoundComet?:string};

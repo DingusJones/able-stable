@@ -4,15 +4,16 @@ Status as researched on 2026-08-30. Reachability does not prove schema stability
 
 | Adapter | Intended authority | Local capability | Publication status |
 |---|---|---|---|
-| Aave | Official API plus direct Pool/data-provider RPC | Protocol fixture parser | Live query and deployment map unverified; demo only |
-| Morpho Blue | Official GraphQL/REST plus RPC cross-check | Protocol fixture parser | Public GraphQL documented; selected query and vault registry not live-tested here |
-| Compound III | Official deployment artifacts plus direct Comet reads | Protocol fixture parser | RPC/deployment reads not configured; demo only |
-| Moonwell Base | `api.moonwell.fi/v1/markets` plus RPC checks | Protocol fixture parser | Endpoint documented/reachable in plan research; current schema not accepted blindly |
+| Aave Base | `api.v3.aave.com/graphql` | Live official markets query, runtime schema, Base market/chain and canonical-address filters | Enabled in live mode; schema drift or no exact native-USDC match produces an explicit provider failure/empty state |
+| Morpho Blue | `api.morpho.org/graphql` | Live Base/listed-market query, runtime schema, address filter | Enabled in live mode; actual observations depend on provider validation at request time |
+| Compound III Base | Direct Comet reads | Isolated explicit-unavailable live adapter | Requires independently verified `COMPOUND_BASE_COMET` and reviewed ABI read; no row today |
+| Moonwell Base | `api.moonwell.fi/v1/markets?chain=base` | Live request, runtime schema, address filter | Enabled in live mode; schema drift produces provider error, never zero |
+| Seamless | Native source required | Explicit unavailable; DeFiLlama may only supply an advisory row with complete identity/link evidence | Operational status and native source not validated |
 | Kamino | Official API plus Solana RPC | Protocol fixture parser | Root/docs capability known; exact endpoint and unauthenticated quota unverified |
 | Save/Solend | Official integration/API docs plus Solana RPC | Protocol fixture parser | Exact current endpoint and link mapping unverified |
-| DeFiLlama | Discovery/cross-check only | No publishing adapter | Never authoritative; never creates identity or a destination |
+| DeFiLlama | Discovery/cross-check only | Advisory fallback adapter with strict Base/address/project/link gates | Never authoritative; symbols are ignored for identity |
 | CeFi | Reproducible official public source only | Metadata/unavailable state | No universal public numeric feed approved |
 
 Canonical USDC deployments used by fixtures were checked against [Circle's official contract list](https://developers.circle.com/stablecoins/usdc-contract-addresses). Compound documents that deployment artifacts live in its Comet repository. The official Morpho GraphQL endpoint and Circle list were reachable through current documentation research. Other provider capability assertions remain labeled unverified.
 
-No USDT opportunity ships in the demo because a protocol market identity and rate observation were not jointly verified. This is intentional coverage honesty, not a claim that USDT markets do not exist.
+The live endpoint is deliberately restricted to Base native USDC. No USDT opportunity ships because a protocol market identity and rate observation were not jointly verified. This is coverage honesty, not a missing-market claim.

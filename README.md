@@ -4,9 +4,11 @@ Evidence-first stablecoin yield research. This repository contains a phone-first
 
 ## Honest runtime status
 
-The checked-in application runs in **fixture/demo mode**. Its six rates and liquidity values are deliberately illustrative and are always labeled as such in the API and UI. They are not scraped, inferred, or presented as current. Canonical USDC deployment identities come from Circle's official registry. No exact market action link is claimed: the fixture resolver exposes only allowlisted broad protocol destinations.
+The checked-in Wrangler configuration remains **fixture/demo mode by default**. Set `DEMO_MODE=false` only on a Worker that is intended to make live requests. In live mode, `GET /v1/catalog?mode=core&chain=base&asset=usdc` concurrently calls isolated Aave, Morpho, Moonwell, and advisory DeFiLlama adapters. Valid observations survive other-provider failures. No validated rows returns HTTP 503 with `status: "unavailable"`; mixed results return HTTP 206 with `status: "partial"`. Provider failure is never represented as zero or an empty successful catalog.
 
-Production ingestion needs verified query contracts, reviewed market/deployment registries, provider/RPC credentials as applicable, D1/R2/Queue resources, exact-link browser fixtures, and provider terms review. DeFiLlama is not an adapter or data authority in this codebase.
+Aave uses its official GraphQL markets query and requires the AaveV3Base market, Base chain IDs, and canonical native-USDC address; its app-root link remains visibly unverified because no exact asset route was proven. Morpho uses the public GraphQL Base/listed-market query and accepts only the canonical lowercase native-USDC contract. Moonwell uses its Base market endpoint and likewise requires the contract address, so deprecated bridged USDC cannot match by symbol. DeFiLlama is labeled advisory and publishes only when chain, canonical underlying token, TVL, base rate, approved protocol, and an allowlisted exact destination are all present. Compound III and Seamless retain explicit unavailable adapter states; their names alone never create rows.
+
+This phase performs request-time ingestion and returns evidence in the response. Durable D1/R2 history and queue persistence are still deployment prerequisites. Do not describe the public Pages site as live until a Worker with `DEMO_MODE=false` is deployed, probed, and its URL is supplied to the Pages build.
 
 ## Local use
 
@@ -20,7 +22,7 @@ npm run test:e2e
 npm run worker:dev
 ```
 
-The frontend uses its local normalized fixture catalog unless `VITE_API_URL` points to a Worker. `wrangler dev` serves the API; its read endpoints are `/v1/catalog`, `/v1/opportunities/:id`, `/history`, `/assets`, `/chains`, `/protocols`, `/status`, and `/methodology`.
+The frontend uses its local normalized fixture catalog unless `VITE_API_URL` points to a Worker. GitHub Pages reads this from the repository Actions variable `VITE_API_URL`; if absent, the build deliberately remains fixture-only. `wrangler dev` serves the API. Worker variables are documented in `.env.example`; the reserved Compound RPC configuration does not cause an unverified read.
 
 ## Guarantees enforced locally
 
