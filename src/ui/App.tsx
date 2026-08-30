@@ -5,9 +5,11 @@ import { percent, usd } from "../domain/rates";
 import type { CatalogResponse, Mode, Opportunity } from "../domain/types";
 
 export type MorphoFilter = "all" | "vaults" | "lend-usdc" | "borrow-usdc";
+const BASE_CHAIN_ID = "eip155:8453";
+
 export function matchesMorphoFilter(o: Opportunity, filter: MorphoFilter) {
   if (filter === "all") return true;
-  if (o.protocolId !== "morpho" || o.chainId !== "eip155:8453") return false;
+  if (o.protocolId !== "morpho" || o.chainId !== BASE_CHAIN_ID) return false;
   if (filter === "vaults") return o.productType === "vault";
   if (filter === "lend-usdc")
     return o.productType === "market" && o.usdcRole === "lending_asset";
@@ -52,6 +54,14 @@ export function App() {
     [morphoFilter, setMorphoFilter] = useState<MorphoFilter>("all"),
     [selected, setSelected] = useState<string[]>([]),
     [detail, setDetail] = useState<Opportunity>();
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return window.localStorage.getItem("able-stable-theme") === "dark";
+    } catch {
+      return false;
+    }
+  });
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const c = new AbortController();
@@ -73,17 +83,30 @@ export function App() {
     addEventListener("keydown", h);
     return () => removeEventListener("keydown", h);
   }, []);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.dataset.theme = darkMode ? "dark" : "light";
+    try {
+      window.localStorage.setItem(
+        "able-stable-theme",
+        darkMode ? "dark" : "light",
+      );
+    } catch {
+      // The toggle remains usable when storage is unavailable.
+    }
+  }, [darkMode]);
   const hasMorphoBase = (data?.opportunities ?? []).some(
     (o) =>
       o.protocolId === "morpho" &&
-      o.chainId === "eip155:8453" &&
+      o.chainId === BASE_CHAIN_ID &&
       o.productType !== undefined,
   );
+  const morphoBaseEnabled = chain === "all" || chain === BASE_CHAIN_ID;
   const shown = useMemo(() => {
     let a = [...(data?.opportunities ?? [])].filter((o) => {
       const asset = assetById[o.assetId];
       return (
-        matchesMorphoFilter(o, morphoFilter) &&
+        (!morphoBaseEnabled || matchesMorphoFilter(o, morphoFilter)) &&
         (!query ||
           `${o.protocolName} ${o.name} ${asset?.symbol} ${asset?.addressOrMint} ${o.counterAsset?.symbol ?? ""}`
             .toLowerCase()
@@ -105,7 +128,7 @@ export function App() {
           Number(x.baseApy ?? x.baseApr ?? -1),
       );
     return a;
-  }, [data, query, chain, rewards, sort, morphoFilter]);
+  }, [data, query, chain, rewards, sort, morphoFilter, morphoBaseEnabled]);
   const compared = (data?.opportunities ?? []).filter((o) =>
     selected.includes(o.id),
   );
@@ -119,13 +142,25 @@ export function App() {
     );
   }
   return (
-    <div className="app">
+    <div className="app" data-theme={darkMode ? "dark" : "light"}>
       <header className="hero">
         <nav aria-label="Primary">
           <a className="brand" href="#top">
             <span className="mark">A</span>Able Stable
           </a>
-          <a href="#methodology">Methodology</a>
+          <div className="nav-actions">
+            <a href="#methodology">Methodology</a>
+            <button
+              className="theme-toggle"
+              type="button"
+              aria-pressed={darkMode}
+              aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}
+              onClick={() => setDarkMode((enabled) => !enabled)}
+            >
+              <span aria-hidden="true">{darkMode ? "☀" : "☾"}</span>
+              {darkMode ? "Light mode" : "Dark mode"}
+            </button>
+          </div>
         </nav>
         <div className="hero-copy">
           <p className="eyebrow">STABLECOIN YIELD, WITH RECEIPTS</p>
@@ -256,7 +291,7 @@ export function App() {
               Has rewards
             </label>
           </div>
-          {hasMorphoBase && (
+          {hasMorphoBase && morphoBaseEnabled && (
             <fieldset className="morpho-filter">
               <legend>Morpho on Base product</legend>
               {(
@@ -291,14 +326,14 @@ export function App() {
           ) : shown.length === 0 ? (
             <State
               title={
-                morphoFilter !== "all"
+                morphoBaseEnabled && morphoFilter !== "all"
                   ? "No Morpho opportunities match this product filter"
                   : data?.opportunities.length
                     ? "No approved opportunities match these filters"
                     : "No verified opportunities yet"
               }
               text={
-                morphoFilter !== "all"
+                morphoBaseEnabled && morphoFilter !== "all"
                   ? "Try All or another Morpho on Base product filter."
                   : (data?.notices.join(" ") ??
                     "No validated observation exists.")

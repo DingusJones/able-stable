@@ -1,0 +1,36 @@
+/* Theme controls and dark palette follow the base styles so light mode stays unchanged. */
+.app { min-height: 100vh; background: #f1f0e9; color: var(--ink); }
+.nav-actions { display: flex; align-items: center; gap: 18px; position: relative; z-index: 2; }
+.nav-actions > a { color: #dce9e1; text-decoration: none; font-size: 14px; }
+.theme-toggle { display: flex; align-items: center; gap: 7px; border: 1px solid #ffffff45; border-radius: 999px; background: #ffffff10; color: #f9faf4; padding: 8px 12px; font-size: 12px; font-weight: 600; }
+.theme-toggle:hover { background: #ffffff1c; }
+
+:root[data-theme="dark"] { color-scheme: dark; background: #0d1512; --ink: #e7eee9; --muted: #9aaba2; --paper: #15201b; --line: #34433c; --green: #72caa5; --mint: #1b3b2e; }
+:root[data-theme="dark"] body { background: #0d1512; color: var(--ink); }
+.app[data-theme="dark"] { background: #0d1512; }
+.app[data-theme="dark"] .hero { background: radial-gradient(circle at 80% 30%, #174f40 0, transparent 35%), linear-gradient(130deg, #071d17, #0b352b 58%, #071c16); }
+.app[data-theme="dark"] .status-strip { background: #121d18; box-shadow: 0 12px 35px #0006; }
+.app[data-theme="dark"] .tabs button.active { background: #173027; }
+.app[data-theme="dark"] .filters label:not(.check), .app[data-theme="dark"] .card, .app[data-theme="dark"] .morpho-filter span { background: var(--paper); }
+.app[data-theme="dark"] .card:hover { border-color: #668074; }
+.app[data-theme="dark"] .coin { background: #23364d; color: #a8c8ec; }
+.app[data-theme="dark"] .fixture, .app[data-theme="dark"] .warning { color: #e5a866 !important; }
+.app[data-theme="dark"] .state { border-color: #536159; }
+.app[data-theme="dark"] .coverage article { background: #17211d; }
+.app[data-theme="dark"] .compare-bar, .app[data-theme="dark"] footer { background: #071c16; }
+.app[data-theme="dark"] .drawer { background: var(--paper); color: var(--ink); }
+.app[data-theme="dark"] .close { color: var(--ink); }
+.app[data-theme="dark"] .callout { background: #382817; border-color: #e2a253; }
+.app[data-theme="dark"] .detail-grid div { background: #1d2a24; }
+.app[data-theme="dark"] .level { background: #254134; }
+.app[data-theme="dark"] .l2, .app[data-theme="dark"] .l3 { background: #4a321d; }
+.app[data-theme="dark"] .product-badge { background: #302b51; color: #d4cdfa; }
+.app[data-theme="dark"] .card.market .product-badge { background: #44321e; color: #f0c98f; }
+.app[data-theme="dark"] .card.collateral_asset .position { color: #e4b26f; }
+.app[data-theme="dark"] button:focus-visible, .app[data-theme="dark"] a:focus-visible, .app[data-theme="dark"] input:focus-visible, .app[data-theme="dark"] select:focus-visible, .app[data-theme="dark"] .morpho-filter input:focus-visible + span { outline-color: #ffd07b; }
+
+@media (max-width: 600px) {
+  .nav-actions { gap: 8px; }
+  .nav-actions > a { display: none; }
+  .theme-toggle { padding: 8px 10px; }
+}
