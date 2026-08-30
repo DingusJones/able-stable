@@ -1,0 +1,29 @@
+name = "able-stable-api"
+main = "worker/index.ts"
+compatibility_date = "2026-08-30"
+
+[vars]
+DEMO_MODE = "true"
+ALLOWED_ORIGIN = "http://localhost:5173"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "able-stable"
+database_id = "replace-before-deploy"
+
+[[r2_buckets]]
+binding = "EVIDENCE"
+bucket_name = "able-stable-evidence"
+
+[[queues.producers]]
+binding = "INGESTION_QUEUE"
+queue = "able-stable-ingestion"
+
+[[queues.consumers]]
+queue = "able-stable-ingestion"
+dead_letter_queue = "able-stable-ingestion-dlq"
+max_batch_size = 6
+max_retries = 3
+
+[triggers]
+crons = ["*/5 * * * *"]

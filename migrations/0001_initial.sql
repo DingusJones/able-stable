@@ -1,0 +1,11 @@
+PRAGMA foreign_keys = ON;
+CREATE TABLE chains (id TEXT PRIMARY KEY, family TEXT NOT NULL, name TEXT NOT NULL, registry_json TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE TABLE assets (id TEXT PRIMARY KEY, family_id TEXT NOT NULL, chain_id TEXT NOT NULL REFERENCES chains(id), address_or_mint TEXT NOT NULL, symbol TEXT NOT NULL, registry_json TEXT NOT NULL, verified_at TEXT NOT NULL, UNIQUE(chain_id,address_or_mint));
+CREATE TABLE protocols (id TEXT PRIMARY KEY, name TEXT NOT NULL, vetting_status TEXT NOT NULL, registry_json TEXT NOT NULL, reviewed_at TEXT NOT NULL);
+CREATE TABLE opportunities (id TEXT PRIMARY KEY, protocol_id TEXT NOT NULL REFERENCES protocols(id), chain_id TEXT NOT NULL REFERENCES chains(id), entity_kind TEXT NOT NULL, canonical_entity_id TEXT NOT NULL, status TEXT NOT NULL, record_json TEXT NOT NULL, UNIQUE(protocol_id,chain_id,entity_kind,canonical_entity_id));
+CREATE TABLE source_runs (id TEXT PRIMARY KEY, adapter_id TEXT NOT NULL, source_id TEXT NOT NULL, state TEXT NOT NULL, retrieved_at TEXT NOT NULL, raw_payload_hash TEXT, counts_json TEXT NOT NULL, warnings_json TEXT NOT NULL);
+CREATE TABLE yield_observations (id TEXT PRIMARY KEY, opportunity_id TEXT NOT NULL REFERENCES opportunities(id), source_run_id TEXT NOT NULL REFERENCES source_runs(id), observed_at TEXT NOT NULL, base_apr TEXT, base_apy TEXT, total_quoted_apr TEXT, total_quoted_apy TEXT, rate_method TEXT NOT NULL, freshness_status TEXT NOT NULL, evidence_json TEXT NOT NULL, UNIQUE(opportunity_id,source_run_id));
+CREATE INDEX idx_observation_opportunity_time ON yield_observations(opportunity_id,observed_at DESC);
+CREATE TABLE provider_errors (id TEXT PRIMARY KEY, source_run_id TEXT NOT NULL REFERENCES source_runs(id), kind TEXT NOT NULL, safe_message TEXT NOT NULL, retryable INTEGER NOT NULL, occurred_at TEXT NOT NULL);
+CREATE TABLE provider_health (source_id TEXT PRIMARY KEY, state TEXT NOT NULL, last_success TEXT, last_failure TEXT, consecutive_failures INTEGER NOT NULL DEFAULT 0, details_json TEXT NOT NULL);
+CREATE TABLE raw_payload_refs (hash TEXT PRIMARY KEY, r2_key TEXT NOT NULL, redacted INTEGER NOT NULL, byte_length INTEGER NOT NULL, created_at TEXT NOT NULL);
