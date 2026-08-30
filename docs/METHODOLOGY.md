@@ -4,6 +4,8 @@ Able Stable ranks evidence quality ahead of breadth. A publishable live record n
 
 Rates remain decimal strings until display. Base and reward yield are separate. Provider totals are retained but not recreated when methodologies or time windows differ. APR becomes APY only when compounding is known. Forecast, historical, and fixed-to-maturity rates require separate presentation.
 
+For Morpho on Base, product semantics are normalized fields rather than inferred from display text. A listed USDC vault is a curated lending strategy and shows Lending APY. A Morpho Blue market with USDC as its loan asset shows Lender supply APY. A market with USDC as collateral shows Borrow APY, the borrowed counter asset, and liquidation/LLTV/oracle warnings; it is not described as lending. Canonical chain and address identity are required on both sides.
+
 Freshness states are live, recently updated, cached, stale, partial, unavailable, and unverified. Provider failure is never an empty success or zero. Last-known-good data may remain only with its exact age and warning and is excluded from best-current sorting.
 
 Risk is dimensional: contracts, stablecoin/depeg, liquidity/exit, oracle, admin, bridge, custody/counterparty, leverage, rewards, and lockup/maturity. Core is a category, not a safety guarantee. Degen and CeFi are intentionally separate from Core.
