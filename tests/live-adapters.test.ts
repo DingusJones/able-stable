@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { fetchMorpho } from "../src/ingestion/adapters/live-morpho";
-import { fetchMorphoVaults } from "../src/ingestion/adapters/live-morpho-vaults";
+import {
+  fetchMorphoVaults,
+  fetchMorphoVaultsV1,
+  fetchMorphoVaultsV2,
+  MORPHO_V1_VAULTS_QUERY,
+  MORPHO_V2_VAULTS_QUERY,
+} from "../src/ingestion/adapters/live-morpho-vaults";
 import { fetchMoonwell } from "../src/ingestion/adapters/live-moonwell";
 import { fetchDefiLlama } from "../src/ingestion/adapters/live-defillama";
 import {
@@ -66,6 +72,18 @@ const vault = (overrides: Record<string, unknown> = {}) => ({
   asset: { ...token(BASE_USDC, "USDC"), decimals: 6 },
   state: { netApy: "0", totalAssetsUsd: "12" },
   liquidity: { usd: "0" },
+  ...overrides,
+});
+const vaultV2 = (overrides: Record<string, unknown> = {}) => ({
+  address: "0x7777777777777777777777777777777777777777",
+  name: "Official USDC Vault V2",
+  listed: true,
+  asset: { ...token(BASE_USDC, "USDC"), decimals: 6 },
+  chain: { id: 8453 },
+  avgNetApy: "0.07",
+  avgNetApyExcludingRewards: "0.06",
+  totalAssetsUsd: "21",
+  liquidityUsd: "3",
   ...overrides,
 });
 describe("live adapter boundaries", () => {
@@ -200,8 +218,8 @@ describe("live adapter boundaries", () => {
     expect(run.observations).toEqual([]);
     expect(run.counts).toMatchObject({ seen: 2, quarantined: 1, rejected: 1 });
   });
-  it("normalizes listed canonical USDC vaults and keeps unavailable rates explicit", async () => {
-    const run = await fetchMorphoVaults({
+  it("normalizes listed canonical V1 vaults and keeps unavailable rates explicit", async () => {
+    const run = await fetchMorphoVaultsV1({
       at,
       fetcher: () =>
         response({
@@ -228,6 +246,7 @@ describe("live adapter boundaries", () => {
     expect(run.observations).toHaveLength(1);
     expect(run.observations[0]).toMatchObject({
       productType: "vault",
+      vaultVersion: "v1",
       usdcRole: "lending_asset",
       displayRateLabel: "Lending APY",
       baseApy: "0",
@@ -244,6 +263,79 @@ describe("live adapter boundaries", () => {
       quarantined: 1,
       rejected: 1,
     });
+  });
+  it("uses the V2 response shape and its documented APY fallback", async () => {
+    const run = await fetchMorphoVaultsV2({
+      at,
+      fetcher: (_input, init) => {
+        expect(JSON.parse(String(init?.body))).toEqual({ query: MORPHO_V2_VAULTS_QUERY });
+        return response({
+          data: {
+            vaultV2s: {
+              items: [
+                vaultV2(),
+                vaultV2({
+                  address: "0x8888888888888888888888888888888888888888",
+                  avgNetApy: null,
+                  avgNetApyExcludingRewards: "0.04",
+                }),
+                vaultV2({
+                  address: "0x9999999999999999999999999999999999999999",
+                  avgNetApy: null,
+                  avgNetApyExcludingRewards: null,
+                }),
+              ],
+            },
+          },
+        });
+      },
+    });
+    expect(run.observations).toHaveLength(2);
+    expect(run.observations[0]).toMatchObject({
+      vaultVersion: "v2",
+      baseApy: "0.07",
+      tvlUsd: "21",
+      availableLiquidityUsd: "3",
+      evidence: { sourceId: "morpho-vaults-v2-graphql" },
+    });
+    expect(run.observations[1].baseApy).toBe("0.04");
+    expect(run.counts).toMatchObject({ seen: 3, accepted: 2, quarantined: 1 });
+  });
+  it("queries and merges V1 and V2 without name dedupe, but removes exact address duplicates", async () => {
+    const calls: string[] = [];
+    const run = await fetchMorphoVaults({
+      at,
+      fetcher: (_input, init) => {
+        const query = JSON.parse(String(init?.body)).query as string;
+        calls.push(query);
+        if (query === MORPHO_V1_VAULTS_QUERY) {
+          return response({ data: { vaults: { items: [vault(), vault({ address: "0x4444444444444444444444444444444444444444" })] } } });
+        }
+        return response({
+          data: { vaultV2s: { items: [vaultV2({ name: "Official USDC Vault" }), vaultV2({ address: "0x3333333333333333333333333333333333333333" })] } },
+        });
+      },
+    });
+    expect(new Set(calls)).toEqual(new Set([MORPHO_V1_VAULTS_QUERY, MORPHO_V2_VAULTS_QUERY]));
+    expect(run.counts).toMatchObject({ seen: 4, accepted: 3 });
+    expect(run.observations.map((o) => o.vaultVersion)).toEqual(["v1", "v1", "v2"]);
+    expect(run.observations.filter((o) => o.name === "Official USDC Vault")).toHaveLength(3);
+    expect(new Set(run.observations.map((o) => o.link.url)).size).toBe(3);
+  });
+  it("preserves a valid vault version when the other version fails", async () => {
+    const run = await fetchMorphoVaults({
+      at,
+      fetcher: (_input, init) => {
+        const query = JSON.parse(String(init?.body)).query as string;
+        return query === MORPHO_V1_VAULTS_QUERY
+          ? response({ data: { vaults: { items: [vault()] } } })
+          : response("provider unavailable", 503);
+      },
+    });
+    expect(run.state).toBe("partial");
+    expect(run.observations).toHaveLength(1);
+    expect(run.observations[0].vaultVersion).toBe("v1");
+    expect(run.errors).toMatchObject([{ sourceId: "morpho-vaults-v2-graphql", kind: "http" }]);
   });
   it("isolates provider failure while preserving a good source", async () => {
     const good = await fetchAave({

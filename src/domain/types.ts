@@ -3,6 +3,7 @@ export type FreshnessStatus = 'live' | 'recently_updated' | 'cached' | 'stale' |
 export type AdapterState = 'success' | 'partial' | 'empty' | 'error';
 export type DecimalString = string;
 export type ProductType = 'vault'|'market';
+export type VaultVersion = 'v1'|'v2';
 export type UsdcRole = 'lending_asset'|'collateral_asset';
 export interface CounterAsset { chainId: string; address: string; symbol: string; decimals: number; }
 
@@ -14,7 +15,7 @@ export interface Freshness { status: FreshnessStatus; retrievedAt?: string; sour
 export interface Evidence { ref: string; sourceId: string; sourceName: string; sourceUrl: string; authority: 'authoritative'|'cross_check'|'advisory'; rawPayloadHash: string; adapterVersion: string; schemaVersion: string; retrievedAt: string; blockOrSlot?: string; demo: boolean; }
 export interface Opportunity {
   id: string; mode: Mode; protocolId: string; protocolName: string; chainId: string; assetId: string; name: string; category: 'money_market'|'vault'|'fixed_yield'|'cefi';
-  productType?: ProductType; usdcRole?: UsdcRole; counterAsset?: CounterAsset; displayRateLabel?: 'Lending APY'|'Lender supply APY'|'Borrow APY'; positionDescription?: string; lltv?: DecimalString; oracleAddress?: string;
+  productType?: ProductType; vaultVersion?: VaultVersion; usdcRole?: UsdcRole; counterAsset?: CounterAsset; displayRateLabel?: 'Lending APY'|'Lender supply APY'|'Borrow APY'; positionDescription?: string; lltv?: DecimalString; oracleAddress?: string;
   baseApr?: DecimalString; baseApy?: DecimalString; rewardComponents: RewardComponent[]; totalQuotedApr?: DecimalString; totalQuotedApy?: DecimalString;
   rateMethod: 'provider_reported'|'onchain_derived'|'annualized_snapshot'|'historical_realized'|'forecast'|'fixed_to_maturity'|'unknown';
   isVariable: boolean; maturityAt?: string; tvlUsd?: DecimalString; availableLiquidityUsd?: DecimalString; utilization?: DecimalString; depositCapUsd?: DecimalString;

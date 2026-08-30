@@ -25,6 +25,8 @@
 .app[data-theme="dark"] .level { background: #254134; }
 .app[data-theme="dark"] .l2, .app[data-theme="dark"] .l3 { background: #4a321d; }
 .app[data-theme="dark"] .product-badge { background: #302b51; color: #d4cdfa; }
+.app[data-theme="dark"] .vault-version { border-color: #d8d0ff; background: #6f61bd; color: #fff; }
+.app[data-theme="dark"] .vault-version.v2 { border-color: #a7f1d4; background: #116e51; }
 .app[data-theme="dark"] .card.market .product-badge { background: #44321e; color: #f0c98f; }
 .app[data-theme="dark"] .card.collateral_asset .position { color: #e4b26f; }
 .app[data-theme="dark"] button:focus-visible, .app[data-theme="dark"] a:focus-visible, .app[data-theme="dark"] input:focus-visible, .app[data-theme="dark"] select:focus-visible, .app[data-theme="dark"] .morpho-filter input:focus-visible + span { outline-color: #ffd07b; }

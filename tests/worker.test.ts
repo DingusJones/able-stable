@@ -16,7 +16,7 @@ describe('worker live catalog',()=>{
 
   expect(response.status).toBe(503);
   expect(body.status).toBe('unavailable');
-  expect(fetcher).toHaveBeenCalledTimes(5);
+  expect(fetcher).toHaveBeenCalledTimes(6);
   expect(body.adapters.flatMap(adapter=>adapter.errors).map(error=>error.message)).not.toContain('Illegal invocation: function called with incorrect reference');
  });
 });

@@ -62,6 +62,7 @@ describe("frontend states and interaction", () => {
       chainId: "eip155:8453",
       assetId: base.assetId,
       productType: "vault",
+      vaultVersion: "v1",
       usdcRole: "lending_asset",
     } as Opportunity;
     const fetch = vi
@@ -99,6 +100,34 @@ describe("frontend states and interaction", () => {
       "No approved opportunities match these filters",
     );
     root.unmount();
+    host.remove();
+    fetch.mockRestore();
+  });
+
+  it("renders accessible V1 and V2 markers while retaining the Vault product marker", async () => {
+    const rows = allDemoOpportunities();
+    const morpho = rows.find((o) => o.protocolId === "morpho")!;
+    const base = rows.find((o) => o.chainId === "eip155:8453")!;
+    const vaults = (["v1", "v2"] as const).map((vaultVersion) => ({
+      ...morpho,
+      id: `test-vault-${vaultVersion}`,
+      name: `Vault ${vaultVersion}`,
+      chainId: "eip155:8453",
+      assetId: base.assetId,
+      productType: "vault" as const,
+      vaultVersion,
+      usdcRole: "lending_asset" as const,
+    }));
+    const fetch = vi.spyOn(api, "fetchCatalog").mockResolvedValue(buildCatalog("core", vaults));
+    const host = document.createElement("div");
+    document.body.append(host);
+    const root = createRoot(host);
+    await act(async () => root.render(<App />));
+    await act(wait);
+    expect(host.querySelector('[aria-label="Morpho Vault V1"]')?.textContent).toBe("V1");
+    expect(host.querySelector('[aria-label="Morpho Vault V2"]')?.textContent).toBe("V2");
+    expect([...host.querySelectorAll(".product-badge")].every((x) => x.textContent === "VAULT · LEND ONLY")).toBe(true);
+    await act(async () => root.unmount());
     host.remove();
     fetch.mockRestore();
   });

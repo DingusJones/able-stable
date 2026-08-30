@@ -11,6 +11,7 @@ import type {
   RewardComponent,
   RiskDimension,
   UsdcRole,
+  VaultVersion,
 } from "../domain/types";
 
 export const BASE_CHAIN = "eip155:8453";
@@ -144,6 +145,7 @@ export function liveOpportunity(x: {
   authority?: Opportunity["evidence"]["authority"];
   confidence?: Opportunity["confidence"];
   productType?: ProductType;
+  vaultVersion?: VaultVersion;
   usdcRole?: UsdcRole;
   counterAsset?: CounterAsset;
   displayRateLabel?: Opportunity["displayRateLabel"];
@@ -163,6 +165,7 @@ export function liveOpportunity(x: {
     name: x.name,
     category: x.category ?? "money_market",
     productType: x.productType,
+    vaultVersion: x.vaultVersion,
     usdcRole: x.usdcRole,
     counterAsset: x.counterAsset,
     displayRateLabel: x.displayRateLabel,

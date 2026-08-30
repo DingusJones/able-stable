@@ -450,6 +450,14 @@ function Card({
           <span>Compare</span>
         </label>
         <div className="badges">
+          {o.productType === "vault" && o.vaultVersion && (
+            <span
+              className={`vault-version ${o.vaultVersion}`}
+              aria-label={`Morpho Vault ${o.vaultVersion.toUpperCase()}`}
+            >
+              {o.vaultVersion.toUpperCase()}
+            </span>
+          )}
           {badge && <span className="product-badge">{badge}</span>}
           <span className={`pill ${o.riskBand}`}>{o.riskBand}</span>
         </div>
@@ -643,6 +651,12 @@ function Detail({
               <dd><code>{o.oracleAddress}</code></dd>
             </div>
           )}
+          {o.vaultVersion && (
+            <div>
+              <dt>Vault version</dt>
+              <dd>Morpho Vault {o.vaultVersion.toUpperCase()}</dd>
+            </div>
+          )}
         </dl>
         <h3>Risk dimensions</h3>
         <div className="risk-list">
@@ -661,6 +675,7 @@ function Detail({
           <li>{o.id}</li>
           <li>{o.freshness.sourceRunId}</li>
           <li>{o.evidence.sourceId}</li>
+          {o.vaultVersion && <li>Morpho Vault {o.vaultVersion.toUpperCase()}</li>}
           <li>{o.evidence.rawPayloadHash}</li>
           <li>
             adapter {o.evidence.adapterVersion} · schema{" "}
